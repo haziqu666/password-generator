@@ -280,23 +280,26 @@ class PasswordGenerator:
             required_chars.append(secrets.choice(self.char_sets['special']))
         
         # 生成密码（确保包含每种选中的字符类型）
-        max_attempts = 100
-        for _ in range(max_attempts):
-            # 先填充必需字符，再随机填充剩余位置
-            remaining_length = length - len(required_chars)
-            password_chars = required_chars.copy()
-            password_chars.extend(secrets.choice(charset) for _ in range(remaining_length))
+        try:
+            max_attempts = 100
+            for _ in range(max_attempts):
+                # 先填充必需字符，再随机填充剩余位置
+                remaining_length = length - len(required_chars)
+                password_chars = required_chars.copy()
+                password_chars.extend(secrets.choice(charset) for _ in range(remaining_length))
+                
+                # 打乱顺序
+                random.shuffle(password_chars)
+                password = ''.join(password_chars)
+                
+                # 确保不与上次生成的密码相同
+                if password != self.last_password:
+                    break
             
-            # 打乱顺序
-            random.shuffle(password_chars)
-            password = ''.join(password_chars)
-            
-            # 确保不与上次生成的密码相同
-            if password != self.last_password:
-                break
-        
-        self.last_password = password
-        self.password_var.set(password)
+            self.last_password = password
+            self.password_var.set(password)
+        except Exception as e:
+            messagebox.showerror("错误", f"生成密码时出错: {str(e)}")
         
     def copy_password(self):
         """复制密码到剪贴板"""
